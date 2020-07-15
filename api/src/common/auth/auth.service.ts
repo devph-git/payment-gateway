@@ -2,15 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 
 import { User } from '../../entities/User.entity';
 import { RevokedToken } from '../../entities/RevokedToken.entity';
-
-interface LoginInterface {
-  email: string;
-  password: string;
-}
+import { LoginUserOutput } from '../dto/auth.dto';
+import { PTC } from '../utils';
 
 @Injectable()
 export class AuthService {
@@ -22,30 +18,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser({
-    email,
-    password,
-  }: LoginInterface): Promise<User | null> {
-    const user: User = await this.users.findOne({ email, disabled: false });
+  async login(user: User): Promise<LoginUserOutput> {
+    const token = await this.jwtService.sign({
+      username: user.username,
+      sub: user.uuid,
+      nth: Math.random(),
+    });
+    await this.users.update(user.id, { auth: token });
 
-    if (user) {
-      const isMatch: boolean = await bcrypt.compare(password, user.password);
-      if (isMatch) return user;
-    }
-
-    return null;
+    this.logger.log(`Logging in: ${user.email}`)
+    return PTC(LoginUserOutput, { token });
   }
-
-  // async login(user: User): Promise<LoginOutput> {
-  //   const token = await this.jwtService.sign({
-  //     username: user.username,
-  //     sub: user.uuid,
-  //     nth: Math.random(),
-  //   });
-  //   await this.users.update(user.id, { auth: token });
-
-  //   return PTC(LoginOutput, { token });
-  // }
 
   // async logout(author: Author): Promise<void> {
   //   const tmp = author.user.auth;

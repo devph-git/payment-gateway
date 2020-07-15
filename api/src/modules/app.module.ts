@@ -19,6 +19,7 @@ import * as getJWTConfig from '../config/jwt.config';
 import { ReactionInterceptor } from '../common/interceptors/reaction.interceptor';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { User } from '../entities/User.entity';
+import { RevokedToken } from '../entities/RevokedToken.entity';
 
 const shared = [
   CacheModule.register(),
@@ -30,7 +31,7 @@ const shared = [
     useFactory: (config: ConfigService) => getORMConfig(config),
     inject: [ConfigService],
   }),
-  TypeOrmModule.forFeature([User]),
+  TypeOrmModule.forFeature([User, RevokedToken]),
   PassportModule,
   JwtModule.registerAsync({
     useFactory: async (config: ConfigService) => getJWTConfig(config),

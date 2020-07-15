@@ -21,10 +21,11 @@ export class UserService {
       return PTC(GenericUserClass, await this.users.findOne(user));
     } catch (error) {
       this.logger.log(error);
-      throw new IncorrectInputFormat(
-        error.message,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new IncorrectInputFormat(error.message);
     }
+  }
+  
+  async fetchUserByEmail({ email }): Promise<User> {
+    return await this.users.findOne({ email })
   }
 }
