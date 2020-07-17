@@ -1,6 +1,6 @@
 // Core dependencies
 import { Controller, Logger, Post, Body, Request, UsePipes, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 // Internal dependencies
 import { UserService } from '../../common/services/user.service';
@@ -36,6 +36,7 @@ export class PublicController {
   }
 
   @Post('/auth/logout')
+  @ApiBearerAuth()
   @UseGuards(UserAuthGuard)
   async signOut(@Request() req): Promise<void> {
     await this.authService.logout(req.user)
