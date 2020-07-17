@@ -18,8 +18,8 @@ class AddressClass {
 }
 
 class Permissions {
-  whiteList: string[];
-  blackList: string[];
+  whiteList: string[] = [];
+  blackList: string[] = [];
 }
 
 @Entity()
@@ -81,7 +81,7 @@ export class User extends Base<User> {
   @Column({
     type: 'jsonb',
     nullable: true,
-    default: JSON.stringify(new AddressClass()),
+    default: JSON.stringify(new Permissions()),
   })
   permissions?: Permissions;
 

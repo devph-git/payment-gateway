@@ -14,46 +14,55 @@ import { ApiProperty } from '@nestjs/swagger';
 
 class GenericAddressInput {
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   streetName?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   houseNumber?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   division?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   barangay?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   municipality?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   province?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   city?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   postalCode?: string;
 
   @ApiProperty()
+  @Expose()
   @IsString()
   @IsOptional()
   country?: string;
@@ -84,14 +93,14 @@ export class CreateUserInput {
   fullname?: string;
 
   @ApiProperty()
-  @ValidateNested({ each: true })
   @Type(() => GenericAddressInput)
+  @ValidateNested()
   @IsOptional()
   primaryAddress?: GenericAddressInput;
 
   @ApiProperty()
-  @ValidateNested({ each: true })
   @Type(() => GenericAddressInput)
+  @ValidateNested()
   @IsOptional()
   secondaryAddress?: GenericAddressInput;
 

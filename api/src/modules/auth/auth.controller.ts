@@ -1,5 +1,5 @@
 // Core dependencies
-import { Controller, Logger, Post, Body, UsePipes } from '@nestjs/common';
+import { Controller, Logger, Post, Body, Request, UsePipes, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 // Internal dependencies
@@ -10,8 +10,9 @@ import { LoginUserInput, LoginUserOutput } from '../../common/dto/auth.dto';
 import { ValidateLoginPipe } from '../../common/pipes/validate-login.pipe';
 import { User } from '../../entities/User.entity';
 import { AuthService } from '../../common/auth/auth.service';
+import { UserAuthGuard } from '../../common/guards/auth.guard';
 
-@ApiTags('Public')
+@ApiTags('Auth')
 @Controller()
 export class PublicController {
   private readonly logger = new Logger(PublicController.name);
@@ -30,13 +31,13 @@ export class PublicController {
   @Post('/auth/login')
   @UsePipes(ValidateLoginPipe)
   async signIn(@Body() loginInfo: LoginUserInput): Promise<LoginUserOutput> {
-    console.log(loginInfo)
     const user: User = await this.userService.fetchUserByEmail({ email: loginInfo.email })
     return await this.authService.login(user)
   }
 
   @Post('/auth/logout')
-  async signOut() {
-    return 'Ok';
+  @UseGuards(UserAuthGuard)
+  async signOut(@Request() req): Promise<void> {
+    await this.authService.logout(req.user)
   }
 }

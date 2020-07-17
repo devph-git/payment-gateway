@@ -13,7 +13,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
 // Internal dependencies
-import { PublicModule } from './public/public.module';
+import { AuthModule } from './auth/auth.module';
 import * as getORMConfig from '../config/orm.config';
 import * as getJWTConfig from '../config/jwt.config';
 import { ReactionInterceptor } from '../common/interceptors/reaction.interceptor';
@@ -41,7 +41,7 @@ const shared = [
 
 @Global()
 @Module({
-  imports: [...shared, PublicModule],
+  imports: [...shared, AuthModule],
   exports: shared,
   providers: [
     {
@@ -51,7 +51,7 @@ const shared = [
     {
       provide: APP_INTERCEPTOR,
       useClass: ReactionInterceptor,
-    },
+    }
   ],
 })
 export class AppModule {
