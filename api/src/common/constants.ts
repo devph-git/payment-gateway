@@ -1,5 +1,9 @@
 const constants = {
   SALT_ROUNDS: 10,
+  RATELIMIT: {
+    max: 50,
+    timeWindow: '1 minute',
+  },
   SWAGGER: {
     TITLE: 'payment-gateway',
     VERSION: '1.0.0',
