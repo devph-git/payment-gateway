@@ -1,7 +1,28 @@
 version: '3.7'
 
 services:
-  db:
+  devphio_payment_gateway_api:
+    container_name: devphio_payment_gateway_api_dev
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    volumes:
+      - './:/app'
+      # set to empty - applicable outside docker environment
+      - '/app/node_modules'
+      - './.env'
+      # ----------------------------------------------------
+    env_file: 
+      - '.env.docker'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - devphio_payment_gateway_db
+      - devphio_payment_gateway_redis
+    command: sh -c "./service-checker.sh"
+
+  devphio_payment_gateway_db:
+    container_name: devphio_payment_gateway_db_dev
     image: postgres:12.0-alpine
     restart: always
     volumes:
@@ -9,9 +30,17 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=local_admin
-      - POSTGRES_PASSWORD=supersecret
+      - POSTGRES_USER=devph_io_admin
+      - POSTGRES_PASSWORD=DEVPHIO_supersecret
       - POSTGRES_DB=payment-gateway
+  
+  devphio_payment_gateway_redis:
+    container_name: devphio_payment_gateway_redis_dev
+    image: redis:6.0-alpine
+    restart: always
+    command: redis-server --requirepass DEVPHIO_supersecret
+    ports:
+      - 6379:6379
 
 volumes:
   postgres_data:

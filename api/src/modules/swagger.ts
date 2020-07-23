@@ -9,7 +9,7 @@ const swaggerInit = app => {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('/', app, document);
 };
 
 export default swaggerInit;
