@@ -14,8 +14,8 @@ import { JwtModule } from '@nestjs/jwt';
 
 // Internal dependencies
 import { AuthModule } from './auth/auth.module';
-import * as getORMConfig from '../config/orm.config';
-import * as getJWTConfig from '../config/jwt.config';
+import getORMConfig from '../config/orm.config';
+import getJWTConfig from '../config/jwt.config';
 import { ReactionInterceptor } from '../common/interceptors/reaction.interceptor';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { User } from '../entities/User.entity';

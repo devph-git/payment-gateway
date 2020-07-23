@@ -1,21 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import * as moment from 'moment';
+import request from 'supertest';
+import moment from 'moment';
 
 // Internal dependencies
 import { AppModule } from '../src/modules/app.module';
 import { GenericUserClass } from '../src/common/dto/user.dto';
-import { INCORRECT_INPUT_FORMAT_EXCEPTION } from '../src/common/exceptions/IncorrectInputFormat.exception';
-import { LoginUserOutput } from '../src/common/dto/auth.dto';
+import { alias as INCORRECT_INPUT_FORMAT_EXCEPTION } from '../src/common/exceptions/IncorrectInputFormat.exception';
+import { LoginUserOutput, RefreshAuthInput } from '../src/common/dto/auth.dto';
 import { getManager } from 'typeorm';
 import { RevokedToken } from '../src/entities/RevokedToken.entity';
-import { User } from 'src/entities/User.entity';
 
 describe('Seller (end to end testing)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -38,6 +37,7 @@ describe('Seller (end to end testing)', () => {
       },
       birthDate: moment('07-31-1990', 'MM-DD-YYYY').toDate(),
     };
+    let createdUser: GenericUserClass = null
 
     // Signup a test user
     newUser.primaryAddress['unknownProperty'] = 'TEST'
@@ -56,10 +56,10 @@ describe('Seller (end to end testing)', () => {
         console.log('New user:', res.body);
         expect(res.status).toEqual(201);
 
-        const body: GenericUserClass = res.body;
-        expect(body.uuid).toBeTruthy();
-        expect(body.email).toEqual(newUser.email);
-        expect(body.username).toEqual(newUser.username);
+        createdUser = res.body;
+        expect(createdUser.uuid).toBeTruthy();
+        expect(createdUser.email).toEqual(newUser.email);
+        expect(createdUser.username).toEqual(newUser.username);
       });
     await request(app.getHttpServer())
       .post('/auth/signup')
@@ -85,6 +85,27 @@ describe('Seller (end to end testing)', () => {
         signedUser = res.body;
         expect(res.status).toEqual(201);
         expect(signedUser.token).toBeTruthy();
+        expect(signedUser.refreshToken).toBeTruthy();
+      });
+    // ---------------------------------------------------------
+
+    // test refresh token
+    let refreshTokenInput: RefreshAuthInput = {
+      uuid: createdUser.uuid,
+      refreshToken: signedUser.refreshToken,
+    };
+    const oldToken = signedUser.refreshToken;
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send(refreshTokenInput)
+      .then(res => {
+        console.log('Fetch refresh token:', res.body);
+        expect(res.status).toEqual(201);
+
+        signedUser = res.body;
+        expect(res.status).toEqual(201);
+        expect(signedUser.token).toBeTruthy();
+        expect(signedUser.refreshToken).toBeTruthy();
       });
     // ---------------------------------------------------------
 
@@ -102,6 +123,14 @@ describe('Seller (end to end testing)', () => {
       .send()
       .then(res => {
         console.log('Logout User w/ error due to no Auth:', res.body);
+        expect(res.status).toEqual(401);
+      });
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('Authorization', `Bearer ${oldToken}`)
+      .send()
+      .then(res => {
+        console.log('Logout User w/ error due to old Auth:', res.body);
         expect(res.status).toEqual(401);
       });
     await request(app.getHttpServer())

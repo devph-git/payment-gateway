@@ -1,12 +1,12 @@
 // Core dependencies
-import { Controller, Logger, Post, Body, Request, UsePipes, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Request, UsePipes, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 // Internal dependencies
 import { UserService } from '../../common/services/user.service';
 import { CreateUserInput, GenericUserClass } from '../../common/dto/user.dto';
 import { SecurePasswordPipe } from '../../common/pipes/secure-password.pipe';
-import { LoginUserInput, LoginUserOutput } from '../../common/dto/auth.dto';
+import { LoginUserInput, LoginUserOutput, RefreshAuthInput } from '../../common/dto/auth.dto';
 import { ValidateLoginPipe } from '../../common/pipes/validate-login.pipe';
 import { User } from '../../entities/User.entity';
 import { AuthService } from '../../common/auth/auth.service';
@@ -15,8 +15,6 @@ import { UserAuthGuard } from '../../common/guards/auth.guard';
 @ApiTags('Auth')
 @Controller()
 export class PublicController {
-  private readonly logger = new Logger(PublicController.name);
-
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService
@@ -40,5 +38,10 @@ export class PublicController {
   @UseGuards(UserAuthGuard)
   async signOut(@Request() req): Promise<void> {
     await this.authService.logout(req.user)
+  }
+
+  @Post('/auth/refresh')
+  async refreshToken(@Body() refreshToken: RefreshAuthInput): Promise<LoginUserOutput> {
+    return await this.authService.refreshToken(refreshToken)
   }
 }

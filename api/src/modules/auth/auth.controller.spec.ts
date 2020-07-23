@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { clone } from 'lodash';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { getManager } from 'typeorm';
 
@@ -12,15 +12,15 @@ import { CreateUserInput, GenericUserClass } from '../../common/dto/user.dto';
 import { UserService } from '../../common/services/user.service';
 import { PublicController } from './auth.controller';
 import { User } from '../../entities/User.entity';
-import * as getORMConfig from '../../config/orm.config';
+import getORMConfig from '../../config/orm.config';
 import { SecurePasswordPipe } from '../../common/pipes/secure-password.pipe';
 import { ValidateLoginPipe } from '../../common/pipes/validate-login.pipe';
 import { LoginUserInput, LoginUserOutput } from '../../common/dto/auth.dto';
 import { IncorrectInputFormat } from '../../common/exceptions/IncorrectInputFormat.exception';
-import { AuthService } from '../../common/auth/auth.service';
+import { AuthService, JWTSignPayload } from '../../common/auth/auth.service';
 import { RevokedToken } from '../../entities/RevokedToken.entity';
 import { JwtStrategy } from '../../common/auth/auth.strategy';
-import { UnauthorizedException } from '@nestjs/common';
+import { ExpiredTokenException } from '../../common/exceptions/ExpiredToken.exception';
 
 describe('Test controller', () => {
   let controller: PublicController;
@@ -101,18 +101,20 @@ describe('Test controller', () => {
 
       // Execute logout
       const user = await getManager().transaction(async manager => await manager.findOne(User, { uuid: signup.uuid }));
-      const strategy = new JwtStrategy(new UserService(app.get(getRepositoryToken(User))))
-      await strategy.validate({ email: user.email, uuid: user.uuid })
+      const strategy = new JwtStrategy(new UserService(app.get(getRepositoryToken(User))), app.get(JwtService))
+      const oldToken: JWTSignPayload = await app.get(JwtService).verify(user.auth)
+      await strategy.validate(oldToken)
       await controller.signOut({ user });
       const expiredToken = await getManager().transaction(async manager => await manager.findOne(RevokedToken, { token: signin.token }));
       expect(expiredToken).toBeTruthy()
 
       // Execute logout w/ expired token causing unauthorized access
       try {
-        await strategy.validate({ email: user.email, uuid: user.uuid })
+        console.log(`Logout w/ expired token:`, signin);
+        await strategy.validate(oldToken)
       }
       catch(error) {
-        expect(error).toBeInstanceOf(UnauthorizedException)
+        expect(error).toBeInstanceOf(ExpiredTokenException)
       }
 
       // Execute logout w/ expired token causing duplicate revoked token

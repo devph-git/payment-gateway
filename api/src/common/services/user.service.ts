@@ -1,5 +1,5 @@
 // Core dependencies
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../entities/User.entity';
 import { CreateUserInput, GenericUserClass } from '../dto/user.dto';
 import { IncorrectInputFormat } from '../exceptions/IncorrectInputFormat.exception';
-import { PTC } from '../utils';
+import { PTC, log } from '../utils';
 import { JWTSignPayload } from '../auth/auth.service';
 
 class FindUser {
@@ -19,8 +19,6 @@ class FindUser {
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger(UserService.name);
-
   constructor(@InjectRepository(User) private user: Repository<User>) {}
 
   async createUser(user: CreateUserInput): Promise<GenericUserClass> {
@@ -28,7 +26,7 @@ export class UserService {
       await this.user.insert(new User({ ...user }));
       return PTC(GenericUserClass, await this.user.findOne(user));
     } catch (error) {
-      this.logger.log(error);
+      log({message: error});
       throw new IncorrectInputFormat(error.message);
     }
   }

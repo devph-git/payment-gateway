@@ -1,14 +1,13 @@
-import { PipeTransform, Injectable, ArgumentMetadata, Logger } from '@nestjs/common';
+import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 // Internal dependencies
 import constants from '../constants';
 import { CreateUserInput } from '../dto/user.dto';
+import { log } from '../utils';
 
 @Injectable()
 export class SecurePasswordPipe implements PipeTransform {
-  private readonly logger = new Logger(SecurePasswordPipe.name);
-
   async transform(body: CreateUserInput, metadata: ArgumentMetadata): Promise<CreateUserInput> {
     /**
      * Since password is a sensitive information,
@@ -17,7 +16,7 @@ export class SecurePasswordPipe implements PipeTransform {
     const hash = await bcrypt.hash(body.password, constants.SALT_ROUNDS);
     body.password = hash;
 
-    this.logger.log(`Securing password for ${body.email}`)
+    log({message: `Securing password for ${body.email}`})
     return body;
   }
 }

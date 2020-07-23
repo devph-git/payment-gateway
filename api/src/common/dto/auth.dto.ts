@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString, IsNotEmpty } from "class-validator";
+import { IsEmail, IsString, IsNotEmpty, IsUUID } from "class-validator";
 import { Expose } from "class-transformer";
 
 /** NOTE: reuse on sensitive actions that require password confirmation */
@@ -18,6 +18,20 @@ export class LoginUserInput extends ValidateActionInput {
     email: string;
 }
 
+export class RefreshAuthInput {
+    @ApiProperty()
+    @IsUUID()
+    @IsString()
+    @IsNotEmpty()
+    uuid: string;
+
+    @ApiProperty()
+    @Expose()
+    @IsString()
+    @IsNotEmpty()
+    refreshToken: string;
+}
+
 export class LoginUserOutput {
     @ApiProperty()
     @Expose()
@@ -25,5 +39,9 @@ export class LoginUserOutput {
     @IsNotEmpty()
     token: string;
   
-    /** TODO: include refresh token */
+    @ApiProperty()
+    @Expose()
+    @IsString()
+    @IsNotEmpty()
+    refreshToken: string;
 }
