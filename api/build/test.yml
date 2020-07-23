@@ -2,22 +2,12 @@ version: '3.7'
 
 services:
   devphio_payment_gateway_api:
-    container_name: devphio_payment_gateway_api_dev
-    build:
-      context: ./
-      dockerfile: ./dev.dockerfile
-    volumes:
-      - './:/app'
-      # set to empty - applicable outside docker environment
-      - '/app/node_modules'
-      - './.env'
-      # ----------------------------------------------------
+    image: narraressan/devphio_payment_gateway_api:latest
     ports:
       - '3000:3000'
     depends_on:
       - devphio_payment_gateway_db
       - devphio_payment_gateway_redis
-    command: sh -c "./service-checker.sh && yarn start:dev"
 
   devphio_payment_gateway_db:
     container_name: devphio_payment_gateway_db

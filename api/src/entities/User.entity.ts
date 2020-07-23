@@ -28,8 +28,8 @@ export class User extends Base<User> {
   @Column({ nullable: true })
   auth?: string;
 
-  @Index({ unique: true, where: 'refreshToken IS NOT NULL' })
-  @Column({ nullable: true })
+  @Index({ unique: true, where: 'refresh_token IS NOT NULL' })
+  @Column({ name: 'refresh_token', nullable: true })
   refreshToken?: string;
 
   @Column({ unique: true })
