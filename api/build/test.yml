@@ -5,6 +5,11 @@ services:
     image: narraressan/devphio_payment_gateway_api:latest
     ports:
       - '3000:3000'
+    environment:
+      - APP_HOST=devphio_payment_gateway_api
+      - TYPEORM_HOST=devphio_payment_gateway_db
+      - JWT_LIFESPAN=12h
+      - JWT_REFRESH_LIFESPAN=7d
     depends_on:
       - devphio_payment_gateway_db
       - devphio_payment_gateway_redis

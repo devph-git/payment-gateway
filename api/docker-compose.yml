@@ -8,12 +8,14 @@ services:
       dockerfile: ./dev.dockerfile
     volumes:
       - './:/app'
-      # set to empty - applicable outside docker environment
       - '/app/node_modules'
-      - './.env'
-      # ----------------------------------------------------
     ports:
       - '3000:3000'
+    env_file: 
+      - .env
+    environment:
+      - APP_HOST=devphio_payment_gateway_api
+      - TYPEORM_HOST=devphio_payment_gateway_db
     depends_on:
       - devphio_payment_gateway_db
       - devphio_payment_gateway_redis
