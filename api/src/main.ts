@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
-import * as compression from 'compression';
-import * as helmet from 'helmet';
-import * as rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 import { AppModule } from './modules/app.module';
 import swaggerInit from './modules/swagger';
+import constants from './common/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -16,12 +17,7 @@ async function bootstrap() {
   app.set('trust proxy', 1);
   app.use(compression());
   app.use(helmet());
-  app.use(
-    rateLimit({
-      max: 100, // limit each IP to 100 requests per windowMs
-      windowMs: 10 * 60 * 1000, // 10 minutes
-    }),
-  );
+  app.use(rateLimit(constants.RATELIMIT));
 
   swaggerInit(app);
   await app.listen(process.env.APP_PORT, process.env.APP_HOST);

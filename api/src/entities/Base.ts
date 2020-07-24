@@ -12,6 +12,7 @@ export class Base<T> {
   disabled: boolean;
 
   @Column({
+    name: 'created_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     nullable: true,
@@ -19,6 +20,7 @@ export class Base<T> {
   createdAt?: Timestamp;
 
   @Column({
+    name: 'updated_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
     nullable: true,

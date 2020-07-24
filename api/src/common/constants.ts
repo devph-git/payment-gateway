@@ -1,6 +1,9 @@
 const constants = {
   SALT_ROUNDS: 10,
-  JWT_LIFESPAN: '43200s', // 12 hrs
+  RATELIMIT: {
+    max: 50,
+    timeWindow: '1 minute',
+  },
   SWAGGER: {
     TITLE: 'payment-gateway',
     VERSION: '1.0.0',
