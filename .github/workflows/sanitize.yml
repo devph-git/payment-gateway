@@ -60,6 +60,6 @@ jobs:
         cd ./api
         yarn --force
         yarn lint
-        yarn typeorm:migrate
+        yarn typeorm:run
         yarn test
         yarn test:e2e
