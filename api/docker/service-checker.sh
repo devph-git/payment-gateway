@@ -5,12 +5,7 @@ DB_HOST=devphio_payment_gateway_db
 DB_PORT=5432
 DB_EXECUTE_COMMAND='yarn typeorm:run'
 
-QUEUE_SERVICE=redis
-QUEUE_HOST=devphio_payment_gateway_redis
-QUEUE_PORT=6379
-QUEUE_EXECUTE_COMMAND=''
-
-SERVICES=( 'DB' 'QUEUE' )
+SERVICES=( 'DB' )
 RETRIES=12
 
 for i in "${!SERVICES[@]}"; do

@@ -57,6 +57,4 @@ jobs:
         TYPEORM_HOST: postgres
       run: |
         cd ./api
-        yarn --force
-        yarn test
-        yarn test:e2e
+        ./docker/service-checker.sh
