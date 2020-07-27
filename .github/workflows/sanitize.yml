@@ -40,7 +40,7 @@ jobs:
           POSTGRES_USER: devph_io_admin
           POSTGRES_PASSWORD: DEVPHIO_supersecret
           POSTGRES_DB: payment-gateway
-        port:
+        ports:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
