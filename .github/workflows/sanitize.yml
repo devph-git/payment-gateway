@@ -33,20 +33,20 @@ jobs:
   # - ref: https://github.com/mirromutth/mysql-action/issues/2#issuecomment-537763992
   test_BE:
     runs-on: ubuntu-latest
-    # Label used to access the service container
-    postgres:
-      image: postgres
-      env:
-        POSTGRES_DB: payment-gateway
-        POSTGRES_USER: devph_io_admin
-        POSTGRES_PASSWORD: DEVPHIO_supersecret
-      options: >-
-        --health-cmd pg_isready
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5
-      ports:
-        - 5432:5432
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: payment-gateway
+          POSTGRES_USER: devph_io_admin
+          POSTGRES_PASSWORD: DEVPHIO_supersecret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
