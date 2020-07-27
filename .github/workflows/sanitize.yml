@@ -53,6 +53,8 @@ jobs:
       with:
         node-version: 12
     - name: Install dependencies and trigger basic checkers for API
+      env:
+        TYPEORM_HOST: postgres
       run: |
         cd ./api
         yarn --force
