@@ -33,20 +33,20 @@ jobs:
   # - ref: https://github.com/mirromutth/mysql-action/issues/2#issuecomment-537763992
   test_BE:
     runs-on: ubuntu-latest
-    services:
-      devphio_payment_gateway_db:
-        image: postgres
-        env:
-          POSTGRES_USER: devph_io_admin
-          POSTGRES_PASSWORD: DEVPHIO_supersecret
-          POSTGRES_DB: payment-gateway
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # Label used to access the service container
+    postgres:
+      image: postgres
+      env:
+        POSTGRES_DB: payment-gateway
+        POSTGRES_USER: devph_io_admin
+        POSTGRES_PASSWORD: DEVPHIO_supersecret
+      options: >-
+        --health-cmd pg_isready
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+      ports:
+        - 5432:5432
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
@@ -55,9 +55,11 @@ jobs:
       with:
         node-version: 12
     - name: Install dependencies and trigger basic checkers for API
-      env:
-        TYPEORM_HOST: devphio_payment_gateway_db
       run: |
-        cd ./api
-        env
-        ./docker/service-checker.sh
+        pg_isready --dbname=payment-gateway --host=postgres --port=5432 --username=devph_io_admin --password=DEVPHIO_supersecret
+
+      # env:
+      #   TYPEORM_HOST: devphio_payment_gateway_db
+      # run: |
+      #   cd ./api
+      #   ./docker/service-checker.sh
