@@ -40,4 +40,4 @@ ENV TYPEORM_MIGRATIONS=src/migrations/**.ts
 ENV TYPEORM_MIGRATIONS_DIR=src/migrations
 ENV TYPEORM_MIGRATIONS_RUN=false
 
-CMD [ "sh", "-c", "./service-checker.sh && yarn start:prod" ]
+CMD [ "sh", "-c", "./docker/service-checker.sh && yarn start:prod" ]
