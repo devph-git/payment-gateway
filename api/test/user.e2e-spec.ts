@@ -20,7 +20,13 @@ describe('Seller (end to end testing)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
   });
 
@@ -28,19 +34,19 @@ describe('Seller (end to end testing)', () => {
     const usrRand = Math.random()
       .toString(36)
       .slice(2);
-    let newUser: any = {
+    const newUser: any = {
       email: `${usrRand}@email.com`,
       username: `${usrRand}`,
       password: 'supersecret',
       primaryAddress: {
-        country: 'PH'
+        country: 'PH',
       },
       birthDate: moment('07-31-1990', 'MM-DD-YYYY').toDate(),
     };
-    let createdUser: GenericUserClass = null
+    let createdUser: GenericUserClass = null;
 
     // Signup a test user
-    newUser.primaryAddress['unknownProperty'] = 'TEST'
+    newUser.primaryAddress['unknownProperty'] = 'TEST';
     await request(app.getHttpServer())
       .post('/auth/signup')
       .send(newUser)
@@ -48,7 +54,7 @@ describe('Seller (end to end testing)', () => {
         console.log('New user w/ wrong input error:', res.body);
         expect(res.status).toEqual(400);
       });
-    delete newUser.primaryAddress['unknownProperty']
+    delete newUser.primaryAddress['unknownProperty'];
     await request(app.getHttpServer())
       .post('/auth/signup')
       .send(newUser)
@@ -75,9 +81,9 @@ describe('Seller (end to end testing)', () => {
     let signedUser: LoginUserOutput;
     await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ 
+      .send({
         email: newUser.email,
-        password: newUser.password
+        password: newUser.password,
       })
       .then(res => {
         console.log('Login User:', res.body);
@@ -90,7 +96,7 @@ describe('Seller (end to end testing)', () => {
     // ---------------------------------------------------------
 
     // test refresh token
-    let refreshTokenInput: RefreshAuthInput = {
+    const refreshTokenInput: RefreshAuthInput = {
       uuid: createdUser.uuid,
       refreshToken: signedUser.refreshToken,
     };
@@ -114,7 +120,10 @@ describe('Seller (end to end testing)', () => {
       .post('/auth/logout')
       .send()
       .then(res => {
-        console.log('Logout User w/ error due to no Authorization header:', res.body);
+        console.log(
+          'Logout User w/ error due to no Authorization header:',
+          res.body,
+        );
         expect(res.status).toEqual(401);
       });
     await request(app.getHttpServer())
@@ -145,13 +154,15 @@ describe('Seller (end to end testing)', () => {
       .post('/auth/logout')
       .set('Authorization', `Bearer ${signedUser.token}`)
       .send()
-      .then(async (res) => {
+      .then(async res => {
         console.log('Try if auth has been revoked:', res.body);
         expect(res.status).toEqual(401);
 
         // confirm if jwt token was moved to revoked
         const expiredToken = await getManager().transaction(async manager => {
-          return await manager.findOne(RevokedToken, { token: signedUser.token });
+          return await manager.findOne(RevokedToken, {
+            token: signedUser.token,
+          });
         });
 
         expect(expiredToken).toBeTruthy;

@@ -1,0 +1,65 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Sanitize BE and FE
+
+# Trigger jobs on...
+on: [push, pull_request]
+
+jobs:
+  test_FE:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - name: Install dependencies and trigger basic checkers for ADMIN PAGE
+      run: |
+        cd ./backend/admin
+        npm install
+        npm run lint
+        npm run test
+    - name: Install dependencies and trigger basic checkers for CLIENT PAGE
+      run: |
+        cd ./frontend/client
+        npm install
+        npm run lint
+        npm run test
+  
+  # NOTE: 
+  # - psql and yarn are already included in ubuntu-latest
+  # - ref: https://github.com/mirromutth/mysql-action/issues/2#issuecomment-537763992
+  test_BE:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: payment-gateway
+          POSTGRES_USER: devph_io_admin
+          POSTGRES_PASSWORD: DEVPHIO_supersecret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    - name: Install dependencies and trigger basic checkers for API
+      run: |
+        pg_isready --dbname=payment-gateway --host=localhost --port=5432 --username=devph_io_admin
+        cd ./api
+        yarn --force
+        yarn lint
+        yarn typeorm:run
+        yarn test
+        yarn test:e2e

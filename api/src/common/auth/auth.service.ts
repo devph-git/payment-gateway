@@ -11,10 +11,10 @@ import { LoginUserOutput, RefreshAuthInput } from '../dto/auth.dto';
 import { PTC, log } from '../utils';
 
 export interface JWTSignPayload {
-  email: string
-  uuid: string
-  stamp: string
-  __id: string
+  email: string;
+  uuid: string;
+  stamp: string;
+  __id: string;
 }
 
 @Injectable()
@@ -26,17 +26,19 @@ export class AuthService {
   ) {}
 
   async login(user: User): Promise<LoginUserOutput> {
-    const sub: JWTSignPayload = { 
-      email: user.email, 
+    const sub: JWTSignPayload = {
+      email: user.email,
       uuid: user.uuid,
       stamp: moment().toString(),
-      __id: uuidv4()
-    }
+      __id: uuidv4(),
+    };
     const token = await this.jwtService.sign(sub);
-    const refreshToken = await this.jwtService.sign(sub, { expiresIn: process.env.JWT_REFRESH_LIFESPAN });
+    const refreshToken = await this.jwtService.sign(sub, {
+      expiresIn: process.env.JWT_REFRESH_LIFESPAN,
+    });
     await this.user.update(user.id, { auth: token, refreshToken });
 
-    log({ message: `Logging in: ${user.email}` })
+    log({ message: `Logging in: ${user.email}` });
     return PTC(LoginUserOutput, { token, refreshToken });
   }
 
@@ -45,8 +47,11 @@ export class AuthService {
     await this.revoked.insert(new RevokedToken({ token: user.auth }));
   }
 
-  async refreshToken({ uuid, refreshToken }: RefreshAuthInput): Promise<LoginUserOutput> {
-    let user: User = await this.user.findOneOrFail({ uuid, refreshToken });
+  async refreshToken({
+    uuid,
+    refreshToken,
+  }: RefreshAuthInput): Promise<LoginUserOutput> {
+    const user: User = await this.user.findOneOrFail({ uuid, refreshToken });
     const oldAuth = user.auth;
     const isValidRefreshToken: object = this.jwtService.verify(refreshToken);
 

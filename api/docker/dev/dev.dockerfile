@@ -1,6 +1,9 @@
 # base image
 FROM node:14.4.0-alpine
 
+# include bash
+RUN apk add bash
+
 # set working directory
 WORKDIR /app
 

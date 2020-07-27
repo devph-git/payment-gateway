@@ -28,7 +28,7 @@ describe('Test controller', () => {
   const usrRand = Math.random()
     .toString(36)
     .slice(2);
-  let newUser: CreateUserInput = {
+  const newUser: CreateUserInput = {
     email: `${usrRand}@email.com`,
     username: `${usrRand}`,
     password: 'supersecret',
@@ -38,7 +38,7 @@ describe('Test controller', () => {
     birthDate: moment('07-31-1990', 'MM-DD-YYYY').toDate(),
   };
 
-  let app: TestingModule
+  let app: TestingModule;
   beforeEach(async () => {
     app = await Test.createTestingModule({
       imports: [
@@ -51,7 +51,7 @@ describe('Test controller', () => {
         PassportModule,
         JwtModule.register({
           secret: 'test secret',
-          signOptions: { expiresIn: '60s' }
+          signOptions: { expiresIn: '60s' },
         }),
       ],
       controllers: [PublicController],
@@ -63,66 +63,87 @@ describe('Test controller', () => {
 
   describe('Auth', () => {
     it('test signup, login, and logout flow', async () => {
-
       // Execute sign up
-      const securedUserInfo = await new SecurePasswordPipe().transform(clone(newUser), null)
+      const securedUserInfo = await new SecurePasswordPipe().transform(
+        clone(newUser),
+        null,
+      );
       const signup: GenericUserClass = await controller.signUp(securedUserInfo);
       console.log(`New User:`, signup);
       expect(signup).toBeTruthy();
       expect(signup.uuid).toBeTruthy();
-      expect(signup.password).not.toEqual(newUser.password)
+      expect(signup.password).not.toEqual(newUser.password);
 
       // Assemble login credentials
-      const login: LoginUserInput = { email: newUser.email, password: 'WRONG PASSWORD' }
-      const validateLoginInfoPipe = new ValidateLoginPipe(app.get(getRepositoryToken(User)))
+      const login: LoginUserInput = {
+        email: newUser.email,
+        password: 'WRONG PASSWORD',
+      };
+      const validateLoginInfoPipe = new ValidateLoginPipe(
+        app.get(getRepositoryToken(User)),
+      );
 
       // Execute signin with error
       try {
-        await validateLoginInfoPipe.transform(login, null)
-      }
-      catch(error) {
-        expect(error).toBeInstanceOf(IncorrectInputFormat)
+        await validateLoginInfoPipe.transform(login, null);
+      } catch (error) {
+        expect(error).toBeInstanceOf(IncorrectInputFormat);
       }
 
       // Execute signin for unknown user
       try {
-        await validateLoginInfoPipe.transform({ email: 'unknown@email.com', password: '' }, null)
-      }
-      catch(error) {
-        expect(error).toBeInstanceOf(IncorrectInputFormat)
+        await validateLoginInfoPipe.transform(
+          { email: 'unknown@email.com', password: '' },
+          null,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(IncorrectInputFormat);
       }
 
       // Execute signin without error
-      login.password = newUser.password
-      const validateLoginInfo = await validateLoginInfoPipe.transform(login, null)
-      const signin: LoginUserOutput = await controller.signIn(validateLoginInfo);
+      login.password = newUser.password;
+      const validateLoginInfo = await validateLoginInfoPipe.transform(
+        login,
+        null,
+      );
+      const signin: LoginUserOutput = await controller.signIn(
+        validateLoginInfo,
+      );
       console.log(`Login User:`, signin);
-      expect(signin.token).toBeTruthy()
+      expect(signin.token).toBeTruthy();
 
       // Execute logout
-      const user = await getManager().transaction(async manager => await manager.findOne(User, { uuid: signup.uuid }));
-      const strategy = new JwtStrategy(new UserService(app.get(getRepositoryToken(User))), app.get(JwtService))
-      const oldToken: JWTSignPayload = await app.get(JwtService).verify(user.auth)
-      await strategy.validate(oldToken)
+      const user = await getManager().transaction(
+        async manager => await manager.findOne(User, { uuid: signup.uuid }),
+      );
+      const strategy = new JwtStrategy(
+        new UserService(app.get(getRepositoryToken(User))),
+        app.get(JwtService),
+      );
+      const oldToken: JWTSignPayload = await app
+        .get(JwtService)
+        .verify(user.auth);
+      await strategy.validate(oldToken);
       await controller.signOut({ user });
-      const expiredToken = await getManager().transaction(async manager => await manager.findOne(RevokedToken, { token: signin.token }));
-      expect(expiredToken).toBeTruthy()
+      const expiredToken = await getManager().transaction(
+        async manager =>
+          await manager.findOne(RevokedToken, { token: signin.token }),
+      );
+      expect(expiredToken).toBeTruthy();
 
       // Execute logout w/ expired token causing unauthorized access
       try {
         console.log(`Logout w/ expired token:`, signin);
-        await strategy.validate(oldToken)
-      }
-      catch(error) {
-        expect(error).toBeInstanceOf(ExpiredTokenException)
+        await strategy.validate(oldToken);
+      } catch (error) {
+        expect(error).toBeInstanceOf(ExpiredTokenException);
       }
 
       // Execute logout w/ expired token causing duplicate revoked token
       try {
         await controller.signOut({ user });
-      }
-      catch(error) {
-        expect(error).toBeTruthy()
+      } catch (error) {
+        expect(error).toBeTruthy();
       }
     });
   });
