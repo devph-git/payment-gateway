@@ -34,7 +34,7 @@ jobs:
   test_BE:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      devphio_payment_gateway_db:
         image: postgres
         env:
           POSTGRES_USER: devph_io_admin
@@ -54,7 +54,8 @@ jobs:
         node-version: 12
     - name: Install dependencies and trigger basic checkers for API
       env:
-        TYPEORM_HOST: postgres
+        TYPEORM_HOST: devphio_payment_gateway_db
       run: |
         cd ./api
+        env
         ./docker/service-checker.sh
