@@ -11,11 +11,10 @@ import { PTC, log } from '../utils';
 import { JWTSignPayload } from '../auth/auth.service';
 
 class FindUser {
-  uuid?: string
-  auth?: string
-  email?: string
+  uuid?: string;
+  auth?: string;
+  email?: string;
 }
-
 
 @Injectable()
 export class UserService {
@@ -26,16 +25,16 @@ export class UserService {
       await this.user.insert(new User({ ...user }));
       return PTC(GenericUserClass, await this.user.findOne(user));
     } catch (error) {
-      log({message: error});
+      log({ message: error });
       throw new IncorrectInputFormat(error.message);
     }
   }
-  
+
   async fetchUserByEmail({ email }: FindUser): Promise<User> {
-    return await this.user.findOneOrFail({ email })
+    return await this.user.findOneOrFail({ email });
   }
 
   async fetchUserByAuthToken(sub: JWTSignPayload): Promise<User> {
-    return await this.user.findOneOrFail({ uuid: sub.uuid })
+    return await this.user.findOneOrFail({ uuid: sub.uuid });
   }
 }

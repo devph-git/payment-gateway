@@ -51,7 +51,7 @@ const shared = [
     {
       provide: APP_INTERCEPTOR,
       useClass: ReactionInterceptor,
-    }
+    },
   ],
 })
 export class AppModule {

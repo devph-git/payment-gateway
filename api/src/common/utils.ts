@@ -2,7 +2,8 @@ import { plainToClass } from 'class-transformer';
 import { ClassType } from 'class-transformer/ClassTransformer';
 import { Logger } from '@nestjs/common';
 
-const PTC = <T>(clazz: ClassType<T>, obj: object) => plainToClass(clazz, obj, { excludeExtraneousValues: true });
+const PTC = <T>(clazz: ClassType<T>, obj: object) =>
+  plainToClass(clazz, obj, { excludeExtraneousValues: true });
 
 class loggerInterface<T> {
   clazz?: ClassType<T>;
