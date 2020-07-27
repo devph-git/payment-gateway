@@ -56,7 +56,7 @@ jobs:
         node-version: 12
     - name: Install dependencies and trigger basic checkers for API
       run: |
-        pg_isready --dbname=payment-gateway --host=postgres --port=5432 --username=devph_io_admin --password=DEVPHIO_supersecret
+        pg_isready --dbname=payment-gateway --host=postgres --port=5432 --username=devph_io_admin
 
       # env:
       #   TYPEORM_HOST: devphio_payment_gateway_db
