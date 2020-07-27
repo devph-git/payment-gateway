@@ -45,6 +45,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
     steps:
     - name: Checkout source
       uses: actions/checkout@v2
@@ -55,8 +57,9 @@ jobs:
     - name: Install dependencies and trigger basic checkers for API
       run: |
         pg_isready --dbname=payment-gateway --host=localhost --port=5432 --username=devph_io_admin
-
-      # env:
-      #   TYPEORM_HOST: devphio_payment_gateway_db
-      # run: |
-      #   cd ./api
+        cd ./api
+        yarn --force
+        yarn lint
+        yarn typeorm:migrate
+        yarn test
+        yarn test:e2e
